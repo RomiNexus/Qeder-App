@@ -72,22 +72,13 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff,woff2}'],
-        // Cache the Quran/Dua audio recitations (from cdn.islamic.network) for offline playback
+        // Note: audio recitations from cdn.islamic.network are intentionally
+        // NOT intercepted by the service worker. Workbox's CacheFirst
+        // strategy doesn't stream partial/range requests well, which made
+        // playback slow or stuck once the SW took control (i.e. after
+        // install). Audio is left to the browser's native network handling
+        // instead — fast and reliable, at the cost of offline playback.
         runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/cdn\.islamic\.network\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'qeder-audio-cache',
-              expiration: {
-                maxEntries: 60,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year — recitations never change
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
             handler: 'CacheFirst',
